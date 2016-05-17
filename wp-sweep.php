@@ -204,6 +204,9 @@ class WPSweep {
                 $total_count = $this->total_count( $_GET['sweep_type'] );
                 $total_stats = array();
                 switch( $_GET['sweep_type'] ) {
+                    case 'products':
+                        $total_stats = array( 'products' => $this->total_count( 'products' ) );
+                        break;
                     case 'posts':
                     case 'postmeta':
                         $total_stats = array( 'posts' => $this->total_count( 'posts' ), 'postmeta' => $this->total_count( 'postmeta' ) );
@@ -256,6 +259,9 @@ class WPSweep {
         $count = 0;
 
         switch( $name ) {
+            case 'products':
+                $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", 'product' ) );
+                break;
             case 'posts':
                 $count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->posts" );
                 break;
@@ -312,6 +318,9 @@ class WPSweep {
         $count = 0;
 
         switch( $name ) {
+            case 'deleted_products':
+                $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s", 'product', 'trash' ) );
+                break;
             case 'revisions':
                 $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_type = %s", 'revision' ) );
                 break;
@@ -401,6 +410,9 @@ class WPSweep {
         $details = array();
 
         switch( $name ) {
+            case 'deleted_products':
+                $details = $wpdb->get_col( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s AND post_status = %s LIMIT %d", 'product', 'trash', $this->limit_details ) );
+                break;
             case 'revisions':
                 $details = $wpdb->get_col( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s LIMIT %d", 'revision', $this->limit_details ) );
                 break;
@@ -502,6 +514,16 @@ class WPSweep {
         $message = '';
 
         switch( $name ) {
+            case 'deleted_products':
+                $query = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s AND post_status = %s", 'product', 'trash' ) );
+                if( $query ) {
+                    foreach ( $query as $id ) {
+                        wp_delete_post( $id, true );
+                    }
+
+                    $message = sprintf( __( '%s Deleted Products Processed', 'wp-sweep' ), number_format_i18n( sizeof( $query ) ) );
+                }
+                break;
             case 'revisions':
                 $query = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", 'revision' ) );
                 if( $query ) {

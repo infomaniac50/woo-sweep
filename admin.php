@@ -14,6 +14,7 @@ if( ! empty( $_GET['sweep'] ) ) {
 }
 
 ### Database Table Status
+$total_products             = WPSweep::get_instance()->total_count( 'products' );
 $total_posts                = WPSweep::get_instance()->total_count( 'posts' );
 $total_postmeta             = WPSweep::get_instance()->total_count( 'postmeta' );
 $total_comments             = WPSweep::get_instance()->total_count( 'comments' );
@@ -30,6 +31,7 @@ $total_tables               = WPSweep::get_instance()->total_count( 'tables' );
 ### Count
 $revisions                  = WPSweep::get_instance()->count( 'revisions' );
 $auto_drafts                = WPSweep::get_instance()->count( 'auto_drafts' );
+$deleted_products           = WPSweep::get_instance()->count( 'deleted_products' );
 $deleted_posts              = WPSweep::get_instance()->count( 'deleted_posts' );
 $orphan_postmeta            = WPSweep::get_instance()->count( 'orphan_postmeta' );
 $duplicated_postmeta        = WPSweep::get_instance()->count( 'duplicated_postmeta' );
@@ -72,6 +74,41 @@ $transient_options          = WPSweep::get_instance()->count( 'transient_options
     <p>
         <?php printf( __( 'For performance reasons, only %s items will be shown if you click Details', 'wp-sweep' ), number_format_i18n( WPSweep::get_instance()->limit_details ) ); ?>
     </p>
+    <h3><?php _e( 'Woocommerce Sweep', 'wp-sweep' ); ?></h3>
+    <div class="sweep-message"></div>
+    <table class="widefat table-sweep">
+        <thead>
+            <tr>
+                <th class="col-sweep-details"><?php _e( 'Details', 'wp-sweep' ); ?></th>
+                <th class="col-sweep-count"><?php _e( 'Count', 'wp-sweep' ); ?></th>
+                <th class="col-sweep-percent"><?php _e( '% Of', 'wp-sweep' ); ?></th>
+                <th class="col-sweep-action"><?php _e( 'Action', 'wp-sweep' ); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong><?php _e( 'Products', 'wp-sweep' ); ?></strong>
+                    <p class="sweep-details" style="display: none;"></p>
+                </td>
+                <td>
+                    <span class="sweep-count"><?php echo number_format_i18n( $products ); ?></span>
+                </td>
+                <td>
+                    <span class="sweep-percentage"><?php echo WPSweep::get_instance()->format_percentage( $products, $total_products ); ?></span>
+                </td>
+                <td>
+                    <?php if( ! empty( $products ) ): ?>
+                        <button data-action="sweep" data-sweep_name="products" data-sweep_type="posts" data-nonce="<?php echo wp_create_nonce( 'wp_sweep_products' ); ?>" class="button button-primary btn-sweep"><?php _e( 'Sweep', 'wp-sweep' ); ?></button>
+                        <button data-action="sweep_details" data-sweep_name="products" data-sweep_type="posts" data-nonce="<?php echo wp_create_nonce( 'wp_sweep_details_products' ); ?>" class="button btn-sweep-details"><?php _e( 'Details', 'wp-sweep' ); ?></button>
+                    <?php else: ?>
+                        <?php _e( 'N/A', 'wp-sweep' ); ?>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
     <h3><?php _e( 'Post Sweep', 'wp-sweep' ); ?></h3>
     <p><?php printf( __( 'There are a total of <strong class="attention"><span class="sweep-count-type-posts">%s</span> Posts</strong> and <strong class="attention"><span class="sweep-count-type-postmeta">%s</span> Post Meta</strong>.', 'wp-sweep' ), number_format_i18n( $total_posts ), number_format_i18n( $total_postmeta ) ); ?></p>
     <div class="sweep-message"></div>
